@@ -317,6 +317,10 @@ yml_dns_get()
       dns_type="- "
    elif [ "$type" = "https" ]; then
       dns_type="- https://"
+   elif [ "$type" = "quic" ]; then
+      dns_type="- quic://"
+   elif [ "$type" = "sdns" ]; then
+      dns_type="- sdns://"
    fi
 
    if [ -n "$port" ] && [ -n "$ip" ]; then
@@ -1363,6 +1367,7 @@ fi
    ipset create localnetwork hash:net
    ipset add localnetwork 0.0.0.0/8
    ipset add localnetwork 127.0.0.0/8
+   ipset add localnetwork 5.0.0.0/8
    ipset add localnetwork 10.0.0.0/8
    ipset add localnetwork 169.254.0.0/16
    ipset add localnetwork 192.168.0.0/16

@@ -36,6 +36,7 @@ local encrypt_methods_ss = {
 	"aes-128-gcm",
 	"aes-192-gcm",
 	"aes-256-gcm",
+	"chacha20",
 	"chacha20-ietf",
 	"xchacha20",
 	"chacha20-ietf-poly1305",
@@ -117,6 +118,7 @@ o = s:option(ListValue, "type", translate("Server Node Type"))
 o:value("ss", translate("Shadowsocks"))
 o:value("ssr", translate("ShadowsocksR"))
 o:value("vmess", translate("Vmess"))
+o:value("vless", translate("Vless"))
 o:value("trojan", translate("trojan"))
 o:value("snell", translate("Snell"))
 o:value("socks5", translate("Socks5"))
@@ -189,6 +191,7 @@ o = s:option(Value, "uuid", translate("VmessId (UUID)"))
 o.rmempty = true
 o.default = uuid
 o:depends("type", "vmess")
+o:depends("type", "vless")
 
 o = s:option(ListValue, "udp", translate("UDP Enable"))
 o.rmempty = true
@@ -198,6 +201,7 @@ o:value("false")
 o:depends("type", "ss")
 o:depends("type", "ssr")
 o:depends("type", "vmess")
+o:depends("type", "vless")
 o:depends("type", "socks5")
 o:depends("type", "trojan")
 
@@ -228,6 +232,13 @@ o:value("h2", translate("h2"))
 o:value("grpc", translate("grpc"))
 o:depends("type", "vmess")
 
+o = s:option(ListValue, "obfs_trojan", translate("obfs-mode"))
+o.rmempty = true
+o.default = "none"
+o:value("none")
+o:value("websocket", translate("websocket (ws)"))
+o:depends("type", "trojan")
+
 o = s:option(Value, "host", translate("obfs-hosts"))
 o.datatype = "host"
 o.placeholder = translate("example.com")
@@ -243,6 +254,7 @@ o = s:option(Value, "path", translate("path"))
 o.rmempty = true
 o:depends("obfs", "websocket")
 o:depends("obfs_vmess", "websocket")
+o:depends("obfs_trojan", "websocket")
 
 o = s:option(DynamicList, "h2_host", translate("host"))
 o.rmempty = true
@@ -265,6 +277,7 @@ o = s:option(Value, "custom", translate("headers"))
 o.rmempty = true
 o:depends("obfs", "websocket")
 o:depends("obfs_vmess", "websocket")
+o:depends("obfs_trojan", "websocket")
 
 -- [[ skip-cert-verify ]]--
 o = s:option(ListValue, "skip_cert_verify", translate("skip-cert-verify"))
@@ -279,6 +292,7 @@ o:depends("obfs_vmess", "grpc")
 o:depends("type", "socks5")
 o:depends("type", "http")
 o:depends("type", "trojan")
+o:depends("type", "vless")
 
 -- [[ TLS ]]--
 o = s:option(ListValue, "tls", translate("tls"))
@@ -293,6 +307,7 @@ o:depends("obfs_vmess", "http")
 o:depends("obfs_vmess", "grpc")
 o:depends("type", "socks5")
 o:depends("type", "http")
+o:depends("type", "vless")
 
 o = s:option(Value, "servername", translate("servername"))
 o.rmempty = true
@@ -300,6 +315,7 @@ o.datatype = "host"
 o.placeholder = translate("example.com")
 o:depends("obfs_vmess", "websocket")
 o:depends("obfs_vmess", "grpc")
+o:depends("type", "vless")
 
 o = s:option(Value, "keep_alive", translate("keep-alive"))
 o.rmempty = true
@@ -307,6 +323,12 @@ o.default = "true"
 o:value("true")
 o:value("false")
 o:depends("obfs_vmess", "http")
+
+-- vless流控
+o = s:option(Value, "flow", translate("Flow"))
+o.rmempty = true
+o:depends("type", "vless")
+o:depends("obfs_trojan", "none")
 
 -- [[ MUX ]]--
 o = s:option(ListValue, "mux", translate("mux"))

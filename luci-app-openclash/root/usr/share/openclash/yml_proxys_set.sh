@@ -208,6 +208,8 @@ yml_servers_set()
    config_get "h2_path" "$section" "h2_path" ""
    config_get "h2_host" "$section" "h2_host" ""
    config_get "grpc_service_name" "$section" "grpc_service_name" ""
+   config_get "obfs_trojan" "$section" "obfs_trojan" ""
+   config_get "flow" "$section" "flow" ""
 
    if [ "$enabled" = "0" ]; then
       return
@@ -269,6 +271,10 @@ yml_servers_set()
    else
       obfss=""
    fi
+
+   if [ "$obfs_trojan" = "websocket" ]; then
+      obfs_trojan="network: ws"
+   fi
    
    if [ "$obfs_vmess" = "websocket" ]; then
       obfs_vmess="network: ws"
@@ -286,14 +292,14 @@ yml_servers_set()
       obfs_vmess="network: grpc"
    fi
    
-   if [ ! -z "$custom" ] && [ "$type" = "vmess" ]; then
+   if [ ! -z "$custom" ] && [ "$type" = "vmess" -o "$type" = "trojan" ]; then
       custom="Host: $custom"
    fi
    
    if [ ! -z "$path" ]; then
-      if [ "$type" != "vmess" ]; then
+      if [ "$type" != "vmess" -a "$type" != "trojan" ]; then
          path="path: '$path'"
-      elif [ "$obfs_vmess" = "network: ws" ]; then
+      elif [ "$obfs_vmess" = "network: ws" -o "$obfs_trojan" = "network: ws" ]; then
          path="ws-path: $path"
       fi
    fi
@@ -383,6 +389,42 @@ cat >> "$SERVER_FILE" <<-EOF
 EOF
    fi
 fi
+
+#vless
+   if [ "$type" = "vless" ]; then
+cat >> "$SERVER_FILE" <<-EOF
+  - name: "$name"
+    type: $type
+    server: $server
+    port: $port
+    uuid: $uuid
+EOF
+      if [ ! -z "$udp" ]; then
+cat >> "$SERVER_FILE" <<-EOF
+    udp: $udp
+EOF
+      fi
+      if [ ! -z "$skip_cert_verify" ]; then
+cat >> "$SERVER_FILE" <<-EOF
+    skip-cert-verify: $skip_cert_verify
+EOF
+      fi
+      if [ ! -z "$tls" ]; then
+cat >> "$SERVER_FILE" <<-EOF
+    tls: $tls
+EOF
+      fi
+      if [ ! -z "$servername" ] && [ "$tls" = "true" ]; then
+cat >> "$SERVER_FILE" <<-EOF
+    servername: $servername
+EOF
+      fi
+      if [ ! -z "$flow" ]; then
+cat >> "$SERVER_FILE" <<-EOF
+    flow: $flow
+EOF
+      fi
+   fi
 
 #vmess
    if [ "$type" = "vmess" ]; then
@@ -574,6 +616,27 @@ cat >> "$SERVER_FILE" <<-EOF
       grpc-service-name: "$grpc_service_name"
 EOF
    fi
+      if [ ! -z "$flow" ]; then
+cat >> "$SERVER_FILE" <<-EOF
+    flow: $flow
+EOF
+      fi
+      if [ "$obfs_trojan" != "none" ]; then
+cat >> "$SERVER_FILE" <<-EOF
+    $obfs_trojan
+EOF
+      fi
+         if [ ! -z "$path" ] && [ "$obfs_trojan" = "network: ws" ]; then
+cat >> "$SERVER_FILE" <<-EOF
+    $path
+EOF
+         fi
+         if [ ! -z "$custom" ] && [ "$obfs_trojan" = "network: ws" ]; then
+cat >> "$SERVER_FILE" <<-EOF
+    ws-headers:
+      $custom
+EOF
+         fi
    fi
 
 #snell
