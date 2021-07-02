@@ -130,7 +130,7 @@ o.rmempty = false
 
 o = s:option(Value, "server", translate("Server Address"))
 o.datatype = "host"
-o.rmempty = false
+o.rmempty = true
 
 o = s:option(Value, "port", translate("Server Port"))
 o.datatype = "port"
@@ -401,7 +401,7 @@ o = a:option(Button,"Back", " ")
 o.inputtitle = translate("Back Configurations")
 o.inputstyle = "reset"
 o.write = function()
-   m.uci:revert(openclash)
+   m.uci:revert(openclash, sid)
    luci.http.redirect(m.redirect)
 end
 
