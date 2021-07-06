@@ -209,6 +209,7 @@ yml_servers_set()
    config_get "h2_host" "$section" "h2_host" ""
    config_get "grpc_service_name" "$section" "grpc_service_name" ""
    config_get "obfs_trojan" "$section" "obfs_trojan" ""
+   config_get "obfs_vless" "$section" "obfs_vless" ""
    config_get "flow" "$section" "flow" ""
 
    if [ "$enabled" = "0" ]; then
@@ -279,6 +280,10 @@ yml_servers_set()
    if [ "$obfs_trojan" = "grpc" ]; then
       obfs_trojan="network: grpc"
    fi
+
+   if [ "$obfs_vless" = "websocket" ]; then
+      obfs_vless="network: ws"
+   fi
    
    if [ "$obfs_vmess" = "websocket" ]; then
       obfs_vmess="network: ws"
@@ -296,14 +301,14 @@ yml_servers_set()
       obfs_vmess="network: grpc"
    fi
    
-   if [ ! -z "$custom" ] && [ "$type" = "vmess" -o "$type" = "trojan" ]; then
+   if [ ! -z "$custom" ] && [ "$type" = "vmess" -o "$type" = "vless" -o "$type" = "trojan" ]; then
       custom="Host: $custom"
    fi
    
    if [ ! -z "$path" ]; then
-      if [ "$type" != "vmess" -a "$type" != "trojan" ]; then
+      if [ "$type" != "vmess" -a "$type" != "vless" -a "$type" != "trojan" ]; then
          path="path: '$path'"
-      elif [ "$obfs_vmess" = "network: ws" -o "$obfs_trojan" = "network: ws" ]; then
+      elif [ "$obfs_vmess" = "network: ws" -o "$obfs_vless" = "network: ws" -o "$obfs_trojan" = "network: ws" ]; then
          path="ws-path: $path"
       fi
    fi
@@ -428,6 +433,22 @@ EOF
 cat >> "$SERVER_FILE" <<-EOF
     flow: $flow
 EOF
+      fi
+      if [ "$obfs_vless" != "none" ]; then
+cat >> "$SERVER_FILE" <<-EOF
+    $obfs_vless
+EOF
+         if [ ! -z "$path" ] && [ "$obfs_vless" = "network: ws" ]; then
+cat >> "$SERVER_FILE" <<-EOF
+    $path
+EOF
+         fi
+         if [ ! -z "$custom" ] && [ "$obfs_vless" = "network: ws" ]; then
+cat >> "$SERVER_FILE" <<-EOF
+    ws-headers:
+      $custom
+EOF
+         fi
       fi
    fi
 

@@ -621,6 +621,29 @@ do
          system(flow)
       end
       }.join
+
+      Thread.new{
+      #network:
+      if Value['proxies'][$count].key?('network') then
+         if Value['proxies'][$count]['network'].to_s == 'ws'
+            system '${uci_set}obfs_vless=websocket'
+            #ws-path:
+            if Value['proxies'][$count].key?('ws-path') then
+               path = '${uci_set}path=' + Value['proxies'][$count]['ws-path'].to_s
+               system(path)
+            end
+            #Host:
+            if Value['proxies'][$count].key?('ws-headers') then
+               if Value['proxies'][$count]['ws-headers'].key?('Host') then
+                  custom = '${uci_set}custom=' + Value['proxies'][$count]['ws-headers']['Host'].to_s
+                  system(custom)
+               end
+            end
+         else
+            system '${uci_set}obfs_vless=none'
+         end
+      end
+      }.join
    end;
    if '$server_type' == 'vmess' then
       Thread.new{

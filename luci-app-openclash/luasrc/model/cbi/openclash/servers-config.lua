@@ -232,6 +232,13 @@ o:value("h2", translate("h2"))
 o:value("grpc", translate("grpc"))
 o:depends("type", "vmess")
 
+o = s:option(ListValue, "obfs_vless", translate("obfs-mode"))
+o.rmempty = true
+o.default = "none"
+o:value("none")
+o:value("websocket", translate("websocket (ws)"))
+o:depends("type", "vless")
+
 o = s:option(ListValue, "obfs_trojan", translate("obfs-mode"))
 o.rmempty = true
 o.default = "none"
@@ -255,6 +262,7 @@ o = s:option(Value, "path", translate("path"))
 o.rmempty = true
 o:depends("obfs", "websocket")
 o:depends("obfs_vmess", "websocket")
+o:depends("obfs_vless", "websocket")
 o:depends("obfs_trojan", "websocket")
 
 o = s:option(DynamicList, "h2_host", translate("host"))
@@ -278,6 +286,7 @@ o = s:option(Value, "custom", translate("headers"))
 o.rmempty = true
 o:depends("obfs", "websocket")
 o:depends("obfs_vmess", "websocket")
+o:depends("obfs_vless", "websocket")
 o:depends("obfs_trojan", "websocket")
 
 -- [[ skip-cert-verify ]]--
@@ -327,7 +336,7 @@ o:depends("obfs_vmess", "http")
 -- vless流控
 o = s:option(Value, "flow", translate("Flow"))
 o.rmempty = true
-o:depends("type", "vless")
+o:depends("obfs_vless", "none")
 o:depends("obfs_trojan", "none")
 
 -- [[ MUX ]]--
@@ -363,16 +372,16 @@ o = s:option(DynamicList, "alpn", translate("alpn"))
 o.rmempty = true
 o:value("h2")
 o:value("http/1.1")
+o:depends("obfs_vless", "none")
 o:depends("obfs_trojan", "none")
-o:depends("type", "vless")
 
 -- [[ grpc ]]--
 o = s:option(Value, "grpc_service_name", translate("grpc-service-name"))
 o.rmempty = true
 o.datatype = "host"
 o.placeholder = translate("example")
-o:depends("type", "trojan")
 o:depends("obfs_vmess", "grpc")
+o:depends("obfs_trojan", "grpc")
 
 o = s:option(DynamicList, "groups", translate("Proxy Group"))
 o.description = font_red..bold_on..translate("No Need Set when Config Create, The added Proxy Groups Must Exist")..bold_off..font_off
