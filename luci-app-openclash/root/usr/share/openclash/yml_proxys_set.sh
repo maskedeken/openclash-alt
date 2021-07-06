@@ -275,6 +275,10 @@ yml_servers_set()
    if [ "$obfs_trojan" = "websocket" ]; then
       obfs_trojan="network: ws"
    fi
+
+   if [ "$obfs_trojan" = "grpc" ]; then
+      obfs_trojan="network: grpc"
+   fi
    
    if [ "$obfs_vmess" = "websocket" ]; then
       obfs_vmess="network: ws"
@@ -409,15 +413,16 @@ cat >> "$SERVER_FILE" <<-EOF
     skip-cert-verify: $skip_cert_verify
 EOF
       fi
-      if [ ! -z "$tls" ]; then
-cat >> "$SERVER_FILE" <<-EOF
-    tls: $tls
-EOF
-      fi
       if [ ! -z "$servername" ] && [ "$tls" = "true" ]; then
 cat >> "$SERVER_FILE" <<-EOF
     servername: $servername
 EOF
+      fi
+      if [ ! -z "$alpn" ]; then
+cat >> "$SERVER_FILE" <<-EOF
+    alpn:
+EOF
+      config_list_foreach "$section" "alpn" set_alpn
       fi
       if [ ! -z "$flow" ]; then
 cat >> "$SERVER_FILE" <<-EOF
@@ -610,12 +615,6 @@ cat >> "$SERVER_FILE" <<-EOF
     skip-cert-verify: $skip_cert_verify
 EOF
    fi
-   if [ ! -z "$grpc_service_name" ]; then
-cat >> "$SERVER_FILE" <<-EOF
-    grpc-opts:
-      grpc-service-name: "$grpc_service_name"
-EOF
-   fi
       if [ ! -z "$flow" ]; then
 cat >> "$SERVER_FILE" <<-EOF
     flow: $flow
@@ -625,7 +624,6 @@ EOF
 cat >> "$SERVER_FILE" <<-EOF
     $obfs_trojan
 EOF
-      fi
          if [ ! -z "$path" ] && [ "$obfs_trojan" = "network: ws" ]; then
 cat >> "$SERVER_FILE" <<-EOF
     $path
@@ -637,6 +635,13 @@ cat >> "$SERVER_FILE" <<-EOF
       $custom
 EOF
          fi
+         if [ ! -z "$grpc_service_name" ] && [ "$obfs_trojan" = "network: grpc" ]; then
+cat >> "$SERVER_FILE" <<-EOF
+    grpc-opts:
+      grpc-service-name: "$grpc_service_name"
+EOF
+         fi
+      fi
    fi
 
 #snell

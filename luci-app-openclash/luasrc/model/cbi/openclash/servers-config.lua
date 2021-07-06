@@ -118,7 +118,7 @@ o = s:option(ListValue, "type", translate("Server Node Type"))
 o:value("ss", translate("Shadowsocks"))
 o:value("ssr", translate("ShadowsocksR"))
 o:value("vmess", translate("Vmess"))
-o:value("vless", translate("Vless"))
+o:value("vless", translate("VLESS"))
 o:value("trojan", translate("trojan"))
 o:value("snell", translate("Snell"))
 o:value("socks5", translate("Socks5"))
@@ -237,6 +237,7 @@ o.rmempty = true
 o.default = "none"
 o:value("none")
 o:value("websocket", translate("websocket (ws)"))
+o:value("grpc", translate("grpc"))
 o:depends("type", "trojan")
 
 o = s:option(Value, "host", translate("obfs-hosts"))
@@ -307,7 +308,6 @@ o:depends("obfs_vmess", "http")
 o:depends("obfs_vmess", "grpc")
 o:depends("type", "socks5")
 o:depends("type", "http")
-o:depends("type", "vless")
 
 o = s:option(Value, "servername", translate("servername"))
 o.rmempty = true
@@ -363,7 +363,8 @@ o = s:option(DynamicList, "alpn", translate("alpn"))
 o.rmempty = true
 o:value("h2")
 o:value("http/1.1")
-o:depends("type", "trojan")
+o:depends("obfs_trojan", "none")
+o:depends("type", "vless")
 
 -- [[ grpc ]]--
 o = s:option(Value, "grpc_service_name", translate("grpc-service-name"))

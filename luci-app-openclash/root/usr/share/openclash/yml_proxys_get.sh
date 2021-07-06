@@ -587,10 +587,14 @@ do
       }.join
 
       Thread.new{
-      #tls
-      if Value['proxies'][$count].key?('tls') then
-         tls = '${uci_set}tls=' + Value['proxies'][$count]['tls'].to_s
-         system(tls)
+      #alpn
+      if Value['proxies'][$count].key?('alpn') then
+      system '${uci_del}alpn >/dev/null 2>&1'
+      Value['proxies'][$count]['alpn'].each{
+      |x|
+      alpn = '${uci_add}alpn=\"' + x.to_s + '\"'
+      system(alpn)
+      }
       end
       }.join
 
@@ -820,16 +824,6 @@ do
       }.join
       
       Thread.new{
-      #grpc-service-name
-      if Value['proxies'][$count].key?('grpc-opts') then
-         if Value['proxies'][$count]['grpc-opts'].key?('grpc-service-name') then
-            grpc_service_name = '${uci_set}grpc_service_name=\"' + Value['proxies'][$count]['grpc-opts']['grpc-service-name'].to_s + '\"'
-            system(grpc_service_name)
-         end
-      end
-      }.join
-      
-      Thread.new{
       #skip-cert-verify
       if Value['proxies'][$count].key?('skip-cert-verify') then
          skip_cert_verify = '${uci_set}skip_cert_verify=' + Value['proxies'][$count]['skip-cert-verify'].to_s
@@ -849,7 +843,7 @@ do
       #network:
       if Value['proxies'][$count].key?('network') then
          if Value['proxies'][$count]['network'].to_s == 'ws'
-            `${uci_set}obfs_trojan=websocket`
+            system '${uci_set}obfs_trojan=websocket'
             #ws-path:
             if Value['proxies'][$count].key?('ws-path') then
                path = '${uci_set}path=' + Value['proxies'][$count]['ws-path'].to_s
@@ -862,8 +856,17 @@ do
                   system(custom)
                end
             end
+         elsif Value['proxies'][$count]['network'].to_s == 'grpc'
+            #grpc-service-name
+            system '${uci_set}obfs_trojan=grpc'
+            if Value['proxies'][$count].key?('grpc-opts') then
+               if Value['proxies'][$count]['grpc-opts'].key?('grpc-service-name') then
+                  grpc_service_name = '${uci_set}grpc_service_name=\"' + Value['proxies'][$count]['grpc-opts']['grpc-service-name'].to_s + '\"'
+                  system(grpc_service_name)
+               end
+            end
          else
-            `${uci_set}obfs_trojan=none`
+            system '${uci_set}obfs_trojan=none'
          end
       end
       }.join
