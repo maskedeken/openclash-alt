@@ -1410,7 +1410,7 @@ if [ -z "$en_mode_tun" ] || [ "$en_mode_tun" -eq 3 ]; then
    if [ "$en_mode" = "redir-host" ]; then
       iptables -t nat -A openclash -m set ! --match-set common_ports dst -j RETURN >/dev/null 2>&1
       iptables -t nat -A openclash -m set --match-set china_ip_route dst -j RETURN >/dev/null 2>&1
-      iptables -t nat -A openclash -m set --match-set bypass dst -j RETURN >/dev/null 2>&1
+      iptables -t nat -A openclash -m set --match-set whitelist dst -j RETURN >/dev/null 2>&1
    fi
    iptables -t nat -A openclash -p tcp -j REDIRECT --to-ports "$proxy_port"
    iptables -t nat -A PREROUTING -p tcp -j openclash
@@ -1434,7 +1434,7 @@ if [ -z "$en_mode_tun" ] || [ "$en_mode_tun" -eq 3 ]; then
          if [ "$en_mode" = "redir-host" ]; then
             iptables -t mangle -A openclash -m set ! --match-set common_ports dst -j RETURN >/dev/null 2>&1
             iptables -t mangle -A openclash -m set --match-set china_ip_route dst -j RETURN >/dev/null 2>&1
-	    iptables -t mangle -A openclash -m set --match-set bypass dst -j RETURN >/dev/null 2>&1
+	    iptables -t mangle -A openclash -m set --match-set whitelist dst -j RETURN >/dev/null 2>&1
          fi
       #quic
          if [ "$disable_udp_quic" -eq 1 ]; then
@@ -1460,7 +1460,7 @@ if [ -z "$en_mode_tun" ] || [ "$en_mode_tun" -eq 3 ]; then
       iptables -t nat -A openclash_output -m owner ! --uid-owner 65534 -m set ! --match-set common_ports dst -j RETURN >/dev/null 2>&1
       if [ "$en_mode" = "redir-host" ]; then
          iptables -t nat -A openclash_output -m set --match-set china_ip_route dst -j RETURN >/dev/null 2>&1
-	 iptables -t nat -A openclash_output -m set --match-set bypass dst -j RETURN >/dev/null 2>&1
+	 iptables -t nat -A openclash_output -m set --match-set whitelist dst -j RETURN >/dev/null 2>&1
       fi
       if [ "$intranet_allowed" -eq 1 ]; then
          iptables -t nat -A openclash_output -m owner ! --uid-owner 65534 -p tcp -j DNAT --to-destination "$lan_ip:$proxy_port"
@@ -1548,7 +1548,7 @@ if [ -n "$en_mode_tun" ]; then
       iptables -t mangle -A openclash_output -m set --match-set localnetwork dst -j RETURN
       iptables -t mangle -A openclash_output -m owner ! --uid-owner 65534 -m set ! --match-set common_ports dst -j RETURN >/dev/null 2>&1
       iptables -t mangle -A openclash_output -m set --match-set china_ip_route dst -j RETURN >/dev/null 2>&1
-      iptables -t mangle -A openclash_output -m set --match-set bypass dst -j RETURN >/dev/null 2>&1
+      iptables -t mangle -A openclash_output -m set --match-set whitelist dst -j RETURN >/dev/null 2>&1
       iptables -t mangle -A openclash_output -m owner ! --uid-owner 65534 -p tcp -j MARK --set-mark "$PROXY_FWMARK"
       iptables -t mangle -I OUTPUT -j openclash_output
    fi
@@ -1567,7 +1567,7 @@ if [ -n "$en_mode_tun" ]; then
    if [ "$en_mode" = "redir-host" ]; then
       iptables -t mangle -A openclash -m set ! --match-set common_ports dst -j RETURN >/dev/null 2>&1
       iptables -t mangle -A openclash -m set --match-set china_ip_route dst -j RETURN >/dev/null 2>&1
-      iptables -t mangle -A openclash -m set --match-set bypass dst -j RETURN >/dev/null 2>&1
+      iptables -t mangle -A openclash -m set --match-set whitelist dst -j RETURN >/dev/null 2>&1
    fi
    iptables -t mangle -A openclash -j MARK --set-mark "$PROXY_FWMARK"
    
