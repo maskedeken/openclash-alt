@@ -45,7 +45,10 @@
       if [ "$?" -ne "0" ]; then
          LOG_OUT "Chnroute Cidr List Has Been Updated, Starting To Replace The Old Version..."
          mv /tmp/china_ip_route.list "$chnr_path" >/dev/null 2>&1
-         [ "$china_ip_route" -eq 1 ] && [ "$(unify_ps_prevent)" -eq 0 ] && /etc/init.d/openclash restart >/dev/null 2>&1 &
+         [ "$china_ip_route" -eq 1 ] && [ "$(unify_ps_prevent)" -eq 0 ] && {
+                ipset -! flush china_ip_route 2>/dev/null
+                ipset -! restore < "$chnr_path" 2>/dev/null
+         }
          LOG_OUT "Chnroute Cidr List Update Successful!"
          sleep 5
       else
