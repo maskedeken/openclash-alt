@@ -45,8 +45,11 @@ function index()
 	entry({"admin", "services", "openclash", "config_name"}, call("action_config_name"))
 	entry({"admin", "services", "openclash", "switch_config"}, call("action_switch_config"))
 	entry({"admin", "services", "openclash", "toolbar_show"}, call("action_toolbar_show"))
+	entry({"admin", "services", "openclash", "toolbar_show_sys"}, call("action_toolbar_show_sys"))
 	entry({"admin", "services", "openclash", "diag_connection"}, call("action_diag_connection"))
 	entry({"admin", "services", "openclash", "gen_debug_logs"}, call("action_gen_debug_logs"))
+	entry({"admin", "services", "openclash", "log_level"}, call("action_log_level"))
+	entry({"admin", "services", "openclash", "switch_log"}, call("action_switch_log"))
 	entry({"admin", "services", "openclash", "settings"},cbi("openclash/settings"),_("Global Settings"), 30).leaf = true
 	entry({"admin", "services", "openclash", "servers"},cbi("openclash/servers"),_("Servers and Groups"), 40).leaf = true
 	entry({"admin", "services", "openclash", "other-rules-edit"},cbi("openclash/other-rules-edit"), nil).leaf = true
@@ -55,6 +58,7 @@ function index()
 	entry({"admin", "services", "openclash", "rule-providers-manage"},form("openclash/rule-providers-manage"), nil).leaf = true
 	entry({"admin", "services", "openclash", "proxy-provider-file-manage"},form("openclash/proxy-provider-file-manage"), nil).leaf = true
 	entry({"admin", "services", "openclash", "rule-providers-file-manage"},form("openclash/rule-providers-file-manage"), nil).leaf = true
+	entry({"admin", "services", "openclash", "game-rules-file-manage"},form("openclash/game-rules-file-manage"), nil).leaf = true
 	entry({"admin", "services", "openclash", "config-subscribe"},cbi("openclash/config-subscribe"),_("Config Update"), 60).leaf = true
 	entry({"admin", "services", "openclash", "config-subscribe-edit"},cbi("openclash/config-subscribe-edit"), nil).leaf = true
 	entry({"admin", "services", "openclash", "servers-config"},cbi("openclash/servers-config"), nil).leaf = true
@@ -140,6 +144,14 @@ end
 
 local function dase()
 	return uci:get("openclash", "config", "dashboard_password")
+end
+
+local function db_foward_domain()
+	return uci:get("openclash", "config", "dashboard_forward_domain")
+end
+
+local function db_foward_port()
+	return uci:get("openclash", "config", "dashboard_forward_port")
 end
 
 local function check_lastversion()
@@ -284,11 +296,7 @@ function action_restore_config()
 	uci:commit("openclash")
 	luci.sys.call("/etc/init.d/openclash stop >/dev/null 2>&1")
 	luci.sys.call("cp '/usr/share/openclash/backup/openclash' '/etc/config/openclash' >/dev/null 2>&1 &")
-	luci.sys.call("cp '/usr/share/openclash/backup/openclash_custom_rules.list' '/etc/openclash/custom/openclash_custom_rules.list' >/dev/null 2>&1 &")
-	luci.sys.call("cp '/usr/share/openclash/backup/openclash_custom_rules_2.list' '/etc/openclash/custom/openclash_custom_rules_2.list' >/dev/null 2>&1 &")
-	luci.sys.call("cp '/usr/share/openclash/backup/openclash_custom_fake_black.conf' '/etc/openclash/custom/openclash_custom_fake_black.conf' >/dev/null 2>&1 &")
-	luci.sys.call("cp '/usr/share/openclash/backup/openclash_custom_hosts.list' '/etc/openclash/custom/openclash_custom_hosts.list' >/dev/null 2>&1 &")
-	luci.sys.call("cp '/usr/share/openclash/backup/openclash_custom_domain_dns.list' '/etc/openclash/custom/openclash_custom_domain_dns.list' >/dev/null 2>&1 &")
+	luci.sys.call("cp /usr/share/openclash/backup/openclash_custom* /etc/openclash/custom/ >/dev/null 2>&1 &")
 	luci.http.redirect(luci.dispatcher.build_url('admin/services/openclash/settings'))
 end
 
@@ -467,14 +475,57 @@ function action_switch_config()
 	uci:commit("openclash")
 end
 
+function action_log_level()
+	local level, info
+	if is_running() then
+		local daip = daip()
+		local dase = dase() or ""
+		local cn_port = cn_port()
+		if not daip or not cn_port then return end
+		info = json.parse(luci.sys.exec(string.format('curl -sL -m 3 -H "Content-Type: application/json" -H "Authorization: Bearer %s" -XGET http://"%s":"%s"/configs', dase, daip, cn_port)))
+		level = info["log-level"]
+	else
+		level = uci:get("openclash", "config", "log_level") or "info"
+	end
+	luci.http.prepare_content("application/json")
+	luci.http.write_json({
+		log_level = level;
+	})
+end
+
+function action_switch_log()
+	local level, info
+	if is_running() then
+		local daip = daip()
+		local dase = dase() or ""
+		local cn_port = cn_port()
+		level = luci.http.formvalue("log_level")
+		if not daip or not cn_port then luci.http.status(500, "Switch Faild") return end
+		info = luci.sys.exec(string.format('curl -sL -m 3 -H "Content-Type: application/json" -H "Authorization: Bearer %s" -XPATCH http://"%s":"%s"/configs -d \'{\"log-level\": \"%s\"}\'', dase, daip, cn_port, level))
+		if info ~= "" then
+			luci.http.status(500, "Switch Faild")
+		end
+	else
+		luci.http.status(500, "Switch Faild")
+	end
+	luci.http.prepare_content("application/json")
+	luci.http.write_json({
+		info = info;
+	})
+end
+
 local function s(e)
 local t=0
-local a={' KB/S',' MB/S',' GB/S',' TB/S'}
+local a={' B/S',' KB/S',' MB/S',' GB/S',' TB/S'}
+if (e<=1024) then
+	return e..a[1]
+else
 repeat
 e=e/1024
 t=t+1
 until(e<=1024)
 return string.format("%.1f",e)..a[t]
+end
 end
 
 local function i(e)
@@ -487,42 +538,71 @@ until(e<=1024)
 return string.format("%.1f",e)..a[t]
 end
 
-function action_toolbar_show()
+function action_toolbar_show_sys()
 	local pid = luci.sys.exec("pidof clash |tr -d '\n' 2>/dev/null")
-	local traffic, connections, up, down, mem, cpu
+	local mem, cpu
 	if pid and pid ~= "" then
-		local daip = daip()
-		local dase = dase()
-		local cn_port = cn_port()
-		if not daip or not cn_port then return end
-		traffic = json.parse(luci.sys.exec(string.format('curl -sL -m 3 -H "Content-Type: application/json" -H "Authorization: Bearer %s" -XGET http://"%s":"%s"/traffic', dase, daip, cn_port)))
-		connections = json.parse(luci.sys.exec(string.format('curl -sL -m 3 -H "Content-Type: application/json" -H "Authorization: Bearer %s" -XGET http://"%s":"%s"/connections', dase, daip, cn_port)))
-		if traffic and connections then
-			connections = #(connections.connections)
-			up = s(traffic.up)
-			down = s(traffic.down)
-		else
-			up = "0 KB/S"
-			down = "0 KB/S"
-			connections = "0"
-		end
 		mem = tonumber(luci.sys.exec(string.format("cat /proc/%s/status 2>/dev/null |grep -w VmRSS |awk '{print $2}'", pid)))
 		cpu = luci.sys.exec(string.format("top -b -n1 |grep %s 2>/dev/null |head -1 |awk '{print $7}' 2>/dev/null", pid))
 		if mem and cpu then
 			mem = i(mem*1024)
-			cpu = string.gsub(cpu, "%%", " %%")
+			cpu = string.gsub(cpu, "%%\n", "")
 		else
 			mem = "0 KB"
-			cpu = "0 %"
+			cpu = "0"
 		end
 	else
 		return
 	end
 	luci.http.prepare_content("application/json")
 	luci.http.write_json({
-		connections = connections,
+		mem = mem,
+		cpu = cpu;
+	})
+end
+
+function action_toolbar_show()
+	local pid = luci.sys.exec("pidof clash |tr -d '\n' 2>/dev/null")
+	local traffic, connections, connection, up, down, up_total, down_total, mem, cpu
+	if pid and pid ~= "" then
+		local daip = daip()
+		local dase = dase() or ""
+		local cn_port = cn_port()
+		if not daip or not cn_port then return end
+		traffic = json.parse(luci.sys.exec(string.format('curl -sL -m 3 -H "Content-Type: application/json" -H "Authorization: Bearer %s" -XGET http://"%s":"%s"/traffic', dase, daip, cn_port)))
+		connections = json.parse(luci.sys.exec(string.format('curl -sL -m 3 -H "Content-Type: application/json" -H "Authorization: Bearer %s" -XGET http://"%s":"%s"/connections', dase, daip, cn_port)))
+		if traffic and connections then
+			connection = #(connections.connections)
+			up = s(traffic.up)
+			down = s(traffic.down)
+			up_total = i(connections.uploadTotal)
+			down_total = i(connections.downloadTotal)
+		else
+			up = "0 B/S"
+			down = "0 B/S"
+			up_total = "0 KB"
+			down_total = "0 KB"
+			connection = "0"
+		end
+		mem = tonumber(luci.sys.exec(string.format("cat /proc/%s/status 2>/dev/null |grep -w VmRSS |awk '{print $2}'", pid)))
+		cpu = luci.sys.exec(string.format("top -b -n1 |grep %s 2>/dev/null |head -1 |awk '{print $7}' 2>/dev/null", pid))
+		if mem and cpu then
+			mem = i(mem*1024)
+			cpu = string.gsub(cpu, "%%\n", "")
+		else
+			mem = "0 KB"
+			cpu = "0"
+		end
+	else
+		return
+	end
+	luci.http.prepare_content("application/json")
+	luci.http.write_json({
+		connections = connection,
 		up = up,
 		down = down,
+		up_total = up_total,
+		down_total = down_total,
 		mem = mem,
 		cpu = cpu;
 	})
@@ -618,6 +698,8 @@ function action_status()
 		watchdog = is_watchdog(),
 		daip = daip(),
 		dase = dase(),
+		db_foward_port = db_foward_port(),
+		db_foward_domain = db_foward_domain(),
 		web = is_web(),
 		cn_port = cn_port(),
 		restricted_mode = restricted_mode(),
@@ -733,16 +815,31 @@ function action_download_rule()
 end
 
 function action_refresh_log()
+	luci.http.prepare_content("application/json")
 	local logfile="/tmp/openclash.log"
-	if not fs.access(logfile) then
-		luci.http.write("")
-		return
+	local file = io.open(logfile, "r+")
+	local info, len, line, lens, cache
+	local data = ""
+	local limit = 1000
+	local log_tb = {}
+	local log_len = tonumber(luci.http.formvalue("log_len")) or 0
+	if file == nil then
+ 		return nil
+ 	end
+ 	file:seek("set")
+ 	info = file:read("*all")
+ 	info = info:reverse()
+ 	file:close()
+ 	cache, len = string.gsub(info, '[^\n]+', "")
+ 	if len == log_len then return nil end
+	if log_len == 0 then
+		if len > limit then lens = limit else lens = len end
+	else
+		lens = len - log_len
 	end
-	luci.http.prepare_content("text/plain; charset=utf-8")
-	local file=io.open(logfile, "r+")
-	file:seek("set")
-	local info = ""
-	for line in file:lines() do
+	string.gsub(info, '[^\n]+', function(w) table.insert(log_tb, w) end, lens)
+	for i=1, lens do
+		line = log_tb[i]:reverse()
 		if not string.find (line, "level=") then
 			if not string.find (line, "【") and not string.find (line, "】") then
    			line = string.sub(line, 0, 20)..luci.i18n.translate(string.sub(line, 21, -1))
@@ -758,15 +855,18 @@ function action_refresh_log()
    			end
    		end
 		end
-		if info ~= "" then
-			info = info.."\n"..line
-		else
-			info = line
-		end
+		if data == "" then
+    	data = line
+    elseif log_len == 0 and i == limit then
+    	data = data .."\n" .. line .. "\n..."
+    else
+    	data = data .."\n" .. line
+  	end
 	end
-	file:close()
-	luci.http.write(info)
-	return
+	luci.http.write_json({
+		len = len,
+		log = data;
+	})
 end
 
 function action_del_log()

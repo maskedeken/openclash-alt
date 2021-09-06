@@ -92,20 +92,23 @@ msgstr "生成日志"
 msgid "Click to Generate"
 msgstr "点击生成"
 
-msgid "Enable Clash"
+msgid "Enable OpenClash"
 msgstr "启动 OpenClash"
 
-msgid "Disable Clash"
+msgid "Disable OpenClash"
 msgstr "关闭 OpenClash"
 
-msgid "Commit Configurations"
+msgid "Commit Settings"
 msgstr "保存配置"
 
-msgid "Apply Configurations"
+msgid "Apply Settings"
 msgstr "应用配置"
 
 msgid "Download Config"
 msgstr "下载配置"
+
+msgid "Update Config"
+msgstr "更新配置"
 
 msgid "Download Running Config"
 msgstr "下载运行配置"
@@ -167,6 +170,9 @@ msgstr "请自行根据运行速度为TUN模式选择合适的网络栈"
 msgid "China IP Route"
 msgstr "实验性：绕过中国大陆IP"
 
+msgid "China IPv6 Route"
+msgstr "实验性：绕过中国大陆IPv6"
+
 msgid "Bypass The China Network Flows, Improve Performance"
 msgstr "启用后中国大陆流量将不再经过内核，提升系统性能"
 
@@ -190,6 +196,9 @@ msgstr "Silent【静默】"
 
 msgid "Select Core's Log Level"
 msgstr "选择内核日志的默认输出模式"
+
+msgid "Switch Log Level"
+msgstr "切换日志等级"
 
 msgid "Only intranet allowed"
 msgstr "仅允许内网"
@@ -279,12 +288,17 @@ msgstr "服务器类型"
 msgid "(Communication protocol)"
 msgstr "(通讯协议)"
 
-msgid "Enable ipv6 Resolve"
+msgid "Proxy IPv6 Traffic"
+msgstr "IPv6 流量代理"
+
+msgid "Disable IPv6 DHCP To Avoid Abnormal Connection If You Do Not Use"
+msgstr "如果您不使用，请禁用IPv6的DHCP以避免连接异常"
+
+msgid "IPv6 DNS Resolve"
 msgstr "允许IPV6类型DNS解析"
 
 msgid "Enable Clash to Resolve ipv6 DNS Requests"
-msgstr ""
-"固件须配置好IPV6的NAT，如你不使用IPV6请关闭固件的相关服务，避免客户端连接出现异常"
+msgstr "允许解析IPV6类型的DNS请求"
 
 msgid "Rules Setting"
 msgstr "规则设置"
@@ -325,6 +339,9 @@ msgstr "代理集文件列表"
 msgid "Rule Providers File List"
 msgstr "规则集文件列表"
 
+msgid "Game Rules File List"
+msgstr "游戏规则文件列表"
+
 msgid "Please Make Sure Ports Available"
 msgstr "请确保端口可用"
 
@@ -357,6 +374,9 @@ msgstr "运行后，请等待服务器上线"
 
 msgid "Redir Port"
 msgstr "流量转发端口"
+
+msgid "TProxy Port"
+msgstr "TProxy 端口"
 
 msgid "SOCKS5 Port"
 msgstr "SOCKS5 代理端口"
@@ -402,6 +422,18 @@ msgstr "管理页面地址示例:"
 
 msgid "Dashboard Port"
 msgstr "管理页面端口"
+
+msgid "Public Dashboard Address"
+msgstr "管理页面公网域名"
+
+msgid "Domain Name For Dashboard Login From Public Network"
+msgstr "设置公网域名，便于从公网访问时自动登录"
+
+msgid "Public Dashboard Port"
+msgstr "管理页面映射端口"
+
+msgid "Port For Dashboard Login From Public Network"
+msgstr "设置映射端口，便于从公网访问时自动登录"
 
 msgid "GEOIP Update"
 msgstr "GEOIP数据库订阅"
@@ -594,7 +626,7 @@ msgstr ""
 msgid "Servers and Groups"
 msgstr "服务器与策略组管理"
 
-msgid "Load Config"
+msgid "Read Config"
 msgstr "读取配置"
 
 msgid "Delete Unused Servers"
@@ -603,13 +635,13 @@ msgstr "删除未启用节点"
 msgid "Delete Servers"
 msgstr "清空服务器配置"
 
-msgid "Delete Proxy Provider"
+msgid "Delete Proxy Providers"
 msgstr "清空代理集配置"
 
 msgid "Delete Groups"
 msgstr "清空策略组配置"
 
-msgid "Back Configurations"
+msgid "Back Settings"
 msgstr "返回概览"
 
 msgid "Refresh Page"
@@ -1401,6 +1433,9 @@ msgstr ", 如发生回环死机请尝试启用"
 msgid "Custom GEOIP URL"
 msgstr "GEOIP数据库更新URL"
 
+msgid "Custom Chnroute6 Lists URL"
+msgstr "大陆IPV6段更新URL"
+
 msgid "Custom Chnroute Lists URL"
 msgstr "大陆IP段更新URL"
 
@@ -1410,8 +1445,17 @@ msgstr "自定义GEOIP数据库的更新来源，编辑后点击下方按钮生�
 msgid "Custom Chnroute Lists URL, Click Button Below To Refresh After Edit"
 msgstr "自定义大陆IP段的更新来源，编辑后点击下方按钮生效"
 
+msgid "Custom Chnroute6 Lists URL, Click Button Below To Refresh After Edit"
+msgstr "自定义大陆IPV6段的更新来源，编辑后点击下方按钮生效"
+
 msgid "(Default)"
 msgstr "(默认)"
+
+msgid "(Default mmdb)"
+msgstr "(默认，全部国家且仅写入iso_code和geoname_id)"
+
+msgid "(All Info mmdb)"
+msgstr "(全部国家且且包含官方全部信息数据)"
 
 msgid "(Only CN)"
 msgstr "(仅中国数据)"
@@ -1659,20 +1703,38 @@ msgstr "订阅失败，尝试不使用代理下载配置文件..."
 msgid "Start Downloading The Chnroute Cidr List..."
 msgstr "开始下载大陆IP白名单..."
 
+msgid "Start Downloading The Chnroute6 Cidr List..."
+msgstr "开始下载大陆IPV6白名单..."
+
 msgid "Chnroute Cidr List Download Success, Check Updated..."
 msgstr "大陆IP白名单下载成功，检查版本是否更新..."
+
+msgid "Chnroute6 Cidr List Download Success, Check Updated..."
+msgstr "大陆IPV6白名单下载成功，检查版本是否更新..."
 
 msgid "Chnroute Cidr List Has Been Updated, Starting To Replace The Old Version..."
 msgstr "大陆IP白名单有更新，开始替换旧版本..."
 
+msgid "Chnroute6 Cidr List Has Been Updated, Starting To Replace The Old Version..."
+msgstr "大陆IPV6白名单有更新，开始替换旧版本..."
+
 msgid "Chnroute Cidr List Update Successful!"
 msgstr "大陆IP白名单更新成功！"
+
+msgid "Chnroute6 Cidr List Update Successful!"
+msgstr "大陆IPV6白名单更新成功！"
 
 msgid "Updated Chnroute Cidr List No Change, Do Nothing..."
 msgstr "大陆IP白名单没有更新，停止继续操作..."
 
+msgid "Updated Chnroute6 Cidr List No Change, Do Nothing..."
+msgstr "大陆IPV6白名单没有更新，停止继续操作..."
+
 msgid "Chnroute Cidr List Update Error, Please Try Again Later..."
 msgstr "大陆IP白名单下载失败，请检查网络或稍后再试..."
+
+msgid "Chnroute6 Cidr List Update Error, Please Try Again Later..."
+msgstr "大陆IPV6白名单下载失败，请检查网络或稍后再试..."
 
 msgid "Start Downloading Geoip Database..."
 msgstr "开始下载 GEOIP 数据库..."
@@ -1735,7 +1797,7 @@ msgid "Group To Config File..."
 msgstr "策略组到配置文件..."
 
 msgid "Proxy To Config File..."
-msgstr "策略组到配置文件..."
+msgstr "节点到配置文件..."
 
 msgid "Proxy-provider To Config File..."
 msgstr "代理集到配置文件..."
@@ -2253,6 +2315,9 @@ msgstr "错误：节点解析失败，"
 msgid "Error: Resolve Proxy-group Error,"
 msgstr "错误：策略组解析失败，"
 
+msgid "Error: Set default-nameserver Error,"
+msgstr "错误：修改default-nameserver配置失败，"
+
 msgid "switching succeeded!"
 msgstr "切换成功！"
 
@@ -2274,6 +2339,12 @@ msgstr "上传:"
 msgid "Down:"
 msgstr "下载:"
 
+msgid "Up Total:"
+msgstr "上传总量:"
+
+msgid "Down Total:"
+msgstr "下载总量:"
+
 msgid "Connections:"
 msgstr "活动连接:"
 
@@ -2292,8 +2363,8 @@ msgstr "发生了一些错误！"
 msgid "Click to Test"
 msgstr "点击测试"
 
-msgid "Connection Test"
-msgstr "连接测试"
+msgid "Connection Test (Current Browser)"
+msgstr "连接测试（当前浏览器）"
 
 msgid "Backup File"
 msgstr "备份文件"
@@ -2306,3 +2377,28 @@ msgstr "备份 OpenClash"
 
 msgid "Not Select"
 msgstr "未选择"
+
+msgid "1. It may be that the plugin is not running"
+msgstr "1. 可能是插件未在运行"
+
+msgid "2. It may be that the cache causes the browser to directly use the IP for access"
+msgstr "2. 可能是缓存导致浏览直接使用IP地址进行访问"
+
+msgid "3. It may be that DNS hijacking did not take effect, so clash unable to reverse the domain name"
+msgstr "3. 可能是DNS未劫持成功，导致Clash无法正确反推出域名连接"
+
+msgid "4. It may be that the filled address cannot be resolved and connected"
+msgstr "4. 可能是所填地址无法进行解析和连接"
+
+msgid "OpenClash Log"
+msgstr "插件日志"
+
+msgid "Core Log"
+msgstr "内核日志"
+
+msgid "Append Upstream DNS"
+msgstr "追加上游DNS"
+
+msgid "Append The Upstream Assigned DNS And Gateway IP To The Nameserver"
+msgstr "将上游分配的DNS和网关IP追加到Nameserver"
+

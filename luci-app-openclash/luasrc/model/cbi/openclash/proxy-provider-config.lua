@@ -57,6 +57,7 @@ o:value("file")
 
 o = s:option(Value, "name", translate("Provider Name"))
 o.rmempty = false
+o.default = "Proxy-provider -"..sid
 
 o = s:option(ListValue, "path", translate("Provider Path"))
 o.description = translate("Update Your Proxy Provider File From Config Luci Page")
@@ -113,7 +114,7 @@ local t = {
 a = m:section(Table, t)
 
 o = a:option(Button,"Commit", " ")
-o.inputtitle = translate("Commit Configurations")
+o.inputtitle = translate("Commit Settings")
 o.inputstyle = "apply"
 o.write = function()
    m.uci:commit(openclash)
@@ -121,7 +122,7 @@ o.write = function()
 end
 
 o = a:option(Button,"Back", " ")
-o.inputtitle = translate("Back Configurations")
+o.inputtitle = translate("Back Settings")
 o.inputstyle = "reset"
 o.write = function()
    m.uci:revert(openclash, sid)
