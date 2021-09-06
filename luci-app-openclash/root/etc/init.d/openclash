@@ -1504,8 +1504,8 @@ if [ -z "$en_mode_tun" ] || [ "$en_mode_tun" -eq 3 ]; then
    iptables -t nat -A openclash -m set ! --match-set lan_ac_white_ips src -j RETURN >/dev/null 2>&1
    if [ "$en_mode" = "redir-host" ]; then
       iptables -t nat -A openclash -m set ! --match-set common_ports dst -j RETURN >/dev/null 2>&1
-      iptables -t nat -A openclash -m set --match-set whitelist dst -j RETURN >/dev/null 2>&1
       iptables -t nat -A openclash -m set --match-set china_ip_route dst -j RETURN >/dev/null 2>&1
+      iptables -t nat -A openclash -m set --match-set whitelist dst -j RETURN >/dev/null 2>&1
    fi
    iptables -t nat -A openclash -p tcp -j REDIRECT --to-ports "$proxy_port"
    iptables -t nat -A PREROUTING -p tcp -j openclash
@@ -1528,8 +1528,8 @@ if [ -z "$en_mode_tun" ] || [ "$en_mode_tun" -eq 3 ]; then
          iptables -t mangle -A openclash -m set ! --match-set lan_ac_white_macs src -j RETURN >/dev/null 2>&1
          if [ "$en_mode" = "redir-host" ]; then
             iptables -t mangle -A openclash -m set ! --match-set common_ports dst -j RETURN >/dev/null 2>&1
-	    iptables -t mangle -A openclash -m set --match-set whitelist dst -j RETURN >/dev/null 2>&1
             iptables -t mangle -A openclash -m set --match-set china_ip_route dst -j RETURN >/dev/null 2>&1
+	    iptables -t mangle -A openclash -m set --match-set whitelist dst -j RETURN >/dev/null 2>&1
          fi
          iptables -t mangle -A openclash -p udp --dport 53 -j RETURN >/dev/null 2>&1
          iptables -t mangle -A openclash -p udp -j TPROXY --on-port "$proxy_port" --tproxy-mark "$PROXY_FWMARK"
@@ -1637,8 +1637,8 @@ if [ -n "$en_mode_tun" ]; then
    iptables -t mangle -A openclash -m set ! --match-set lan_ac_white_macs src -j RETURN >/dev/null 2>&1
    if [ "$en_mode" = "redir-host" ]; then
       iptables -t mangle -A openclash -m set ! --match-set common_ports dst -j RETURN >/dev/null 2>&1
-      iptables -t mangle -A openclash -m set --match-set whitelist dst -j RETURN >/dev/null 2>&1
       iptables -t mangle -A openclash -m set --match-set china_ip_route dst -j RETURN >/dev/null 2>&1
+      iptables -t mangle -A openclash -m set --match-set whitelist dst -j RETURN >/dev/null 2>&1
    fi
    iptables -t mangle -A openclash -j MARK --set-mark "$PROXY_FWMARK"
    
