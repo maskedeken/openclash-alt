@@ -80,7 +80,10 @@
       if [ "$?" -ne "0" ]; then
          LOG_OUT "Chnroute6 Cidr List Has Been Updated, Starting To Replace The Old Version..."
          mv /tmp/china_ip6_route.list "$chnr6_path" >/dev/null 2>&1
-         [ "$china_ip6_route" -eq 1 ] && [ "$(unify_ps_prevent)" -eq 0 ] && /etc/init.d/openclash restart >/dev/null 2>&1 &
+	 [ "$china_ip6_route" -eq 1 ] && [ "$(unify_ps_prevent)" -eq 0 ] && {
+		 ipset -! flush china_ip6_route 2>/dev/null
+	 	 ipset -! restore < "$chnr6_path" 2>/dev/null
+	 }
          LOG_OUT "Chnroute6 Cidr List Update Successful!"
          sleep 5
       else
