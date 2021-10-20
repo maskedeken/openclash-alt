@@ -166,6 +166,16 @@ cat >> "$SERVER_FILE" <<-EOF
 EOF
 }
 
+set_ws_headers()
+{
+   if [ -z "$1" ]; then
+      return
+   fi
+cat >> "$SERVER_FILE" <<-EOF
+        '$1'
+EOF
+}
+
 #写入服务器节点到配置文件
 yml_servers_set()
 {
@@ -186,6 +196,8 @@ yml_servers_set()
    config_get "obfs_ssr" "$section" "obfs_ssr" ""
    config_get "obfs_param" "$section" "obfs_param" ""
    config_get "obfs_vmess" "$section" "obfs_vmess" ""
+   config_get "obfs_trojan" "$section" "obfs_trojan" ""
+   config_get "obfs_vless" "$section" "obfs_vless" ""
    config_get "protocol" "$section" "protocol" ""
    config_get "protocol_param" "$section" "protocol_param" ""
    config_get "host" "$section" "host" ""
@@ -208,13 +220,13 @@ yml_servers_set()
    config_get "h2_path" "$section" "h2_path" ""
    config_get "h2_host" "$section" "h2_host" ""
    config_get "grpc_service_name" "$section" "grpc_service_name" ""
-   config_get "obfs_trojan" "$section" "obfs_trojan" ""
-   config_get "obfs_vless" "$section" "obfs_vless" ""
    config_get "flow" "$section" "flow" ""
    config_get "ws_opts_path" "$section" "ws_opts_path" ""
    config_get "ws_opts_headers" "$section" "ws_opts_headers" ""
    config_get "max_early_data" "$section" "max_early_data" ""
    config_get "early_data_header_name" "$section" "early_data_header_name" ""
+   config_get "trojan_ws_path" "$section" "trojan_ws_path" ""
+   config_get "trojan_ws_headers" "$section" "trojan_ws_headers" ""
 
    if [ "$enabled" = "0" ]; then
       return
@@ -277,18 +289,6 @@ yml_servers_set()
       obfss=""
    fi
 
-   if [ "$obfs_trojan" = "websocket" ]; then
-      obfs_trojan="network: ws"
-   fi
-
-   if [ "$obfs_trojan" = "grpc" ]; then
-      obfs_trojan="network: grpc"
-   fi
-
-   if [ "$obfs_vless" = "websocket" ]; then
-      obfs_vless="network: ws"
-   fi
-   
    if [ "$obfs_vmess" = "websocket" ]; then
       obfs_vmess="network: ws"
    fi
@@ -305,15 +305,15 @@ yml_servers_set()
       obfs_vmess="network: grpc"
    fi
    
-   if [ ! -z "$custom" ] && [ "$type" = "vmess" -o "$type" = "vless" -o "$type" = "trojan" ]; then
-      custom="Host: $custom"
+   if [ ! -z "$custom" ] && [ "$type" = "vmess" ]; then
+      custom="Host: \"$custom\""
    fi
    
    if [ ! -z "$path" ]; then
-      if [ "$type" != "vmess" -a "$type" != "vless" -a "$type" != "trojan" ]; then
-         path="path: '$path'"
-      elif [ "$obfs_vmess" = "network: ws" -o "$obfs_vless" = "network: ws" -o "$obfs_trojan" = "network: ws" ]; then
-         path="ws-path: $path"
+      if [ "$type" != "vmess" ]; then
+         path="path: \"$path\""
+      elif [ "$obfs_vmess" = "network: ws" ]; then
+         path="ws-path: \"$path\""
       fi
    fi
 
@@ -422,7 +422,7 @@ cat >> "$SERVER_FILE" <<-EOF
     skip-cert-verify: $skip_cert_verify
 EOF
       fi
-      if [ ! -z "$servername" ] && [ "$tls" = "true" ]; then
+      if [ ! -z "$servername" ]; then
 cat >> "$SERVER_FILE" <<-EOF
     servername: $servername
 EOF
@@ -438,33 +438,27 @@ cat >> "$SERVER_FILE" <<-EOF
     flow: $flow
 EOF
       fi
-      if [ "$obfs_vless" != "none" ]; then
+      if [ "$obfs_vless" = "ws" ]; then
 cat >> "$SERVER_FILE" <<-EOF
-    $obfs_vless
+    network: ws
 EOF
-         if [ "$obfs_vless" = "network: ws" ]; then
-            if [ ! -z "$path" ]; then
-cat >> "$SERVER_FILE" <<-EOF
-    $path
-EOF
-            fi
-            if [ ! -z "$custom" ]; then
-cat >> "$SERVER_FILE" <<-EOF
-    ws-headers:
-      $custom
-EOF
-            fi
-            if [ -n "$ws_opts_path" ] || [ -n "$ws_opts_headers" ] || [ -n "$max_early_data" ] || [ -n "$early_data_header_name" ]; then
+        if [ -n "$trojan_ws_path" ] || [ -n "$trojan_ws_headers" ]; then
 cat >> "$SERVER_FILE" <<-EOF
     ws-opts:
-      path: "$ws_opts_path"
-      headers: "$ws_opts_headers"
-      max-early-data: $max_early_data
-      early-data-header-name: "$early_data_header_name"
 EOF
-            fi
-         fi
-      fi
+        fi
+        if [ -n "$trojan_ws_path" ]; then
+cat >> "$SERVER_FILE" <<-EOF
+      path: "$trojan_ws_path"
+EOF
+        fi
+        if [ -n "$trojan_ws_headers" ]; then
+cat >> "$SERVER_FILE" <<-EOF
+      headers:
+EOF
+         config_list_foreach "$section" "trojan_ws_headers" set_ws_headers
+        fi
+     fi
    fi
 
 #vmess
@@ -517,11 +511,28 @@ EOF
             if [ -n "$ws_opts_path" ] || [ -n "$ws_opts_headers" ] || [ -n "$max_early_data" ] || [ -n "$early_data_header_name" ]; then
 cat >> "$SERVER_FILE" <<-EOF
     ws-opts:
+EOF
+               if [ -n "$ws_opts_path" ]; then
+cat >> "$SERVER_FILE" <<-EOF
       path: "$ws_opts_path"
-      headers: "$ws_opts_headers"
+EOF
+               fi
+               if [ -n "$ws_opts_headers" ]; then
+cat >> "$SERVER_FILE" <<-EOF
+      headers:
+EOF
+                  config_list_foreach "$section" "ws_opts_headers" set_ws_headers
+               fi
+               if [ -n "$max_early_data" ]; then
+cat >> "$SERVER_FILE" <<-EOF
       max-early-data: $max_early_data
+EOF
+               fi
+               if [ -n "$early_data_header_name" ]; then
+cat >> "$SERVER_FILE" <<-EOF
       early-data-header-name: "$early_data_header_name"
 EOF
+               fi
             fi
          fi
          if [ "$obfs_vmess" = "network: http" ]; then
@@ -665,44 +676,43 @@ cat >> "$SERVER_FILE" <<-EOF
     skip-cert-verify: $skip_cert_verify
 EOF
    fi
-      if [ ! -z "$flow" ]; then
+   if [ ! -z "$flow" ]; then
 cat >> "$SERVER_FILE" <<-EOF
     flow: $flow
 EOF
-      fi
-      if [ "$obfs_trojan" != "none" ]; then
+   fi
+   if [ "$obfs_trojan" = "grpc" ]; then
 cat >> "$SERVER_FILE" <<-EOF
-    $obfs_trojan
+    network: grpc
 EOF
-         if [ "$obfs_trojan" = "network: ws" ]; then
-            if [ ! -z "$path" ]; then
-cat >> "$SERVER_FILE" <<-EOF
-    $path
-EOF
-            fi
-            if [ ! -z "$custom" ]; then
-cat >> "$SERVER_FILE" <<-EOF
-    ws-headers:
-      $custom
-EOF
-            fi
-            if [ -n "$ws_opts_path" ] || [ -n "$ws_opts_headers" ] || [ -n "$max_early_data" ] || [ -n "$early_data_header_name" ]; then
-cat >> "$SERVER_FILE" <<-EOF
-    ws-opts:
-      path: "$ws_opts_path"
-      headers: "$ws_opts_headers"
-      max-early-data: $max_early_data
-      early-data-header-name: "$early_data_header_name"
-EOF
-            fi
-         fi
-         if [ ! -z "$grpc_service_name" ] && [ "$obfs_trojan" = "network: grpc" ]; then
+      if [ ! -z "$grpc_service_name" ]; then
 cat >> "$SERVER_FILE" <<-EOF
     grpc-opts:
       grpc-service-name: "$grpc_service_name"
 EOF
-         fi
       fi
+   fi
+   if [ "$obfs_trojan" = "ws" ]; then
+cat >> "$SERVER_FILE" <<-EOF
+    network: ws
+EOF
+      if [ -n "$trojan_ws_path" ] || [ -n "$trojan_ws_headers" ]; then
+cat >> "$SERVER_FILE" <<-EOF
+    ws-opts:
+EOF
+      fi
+      if [ -n "$trojan_ws_path" ]; then
+cat >> "$SERVER_FILE" <<-EOF
+      path: "$trojan_ws_path"
+EOF
+      fi
+      if [ -n "$trojan_ws_headers" ]; then
+cat >> "$SERVER_FILE" <<-EOF
+      headers:
+EOF
+         config_list_foreach "$section" "trojan_ws_headers" set_ws_headers
+      fi
+   fi
    fi
 
 #snell

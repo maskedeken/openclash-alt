@@ -570,46 +570,21 @@ do
       }.join
 
       Thread.new{
-      #network:
-      if Value['proxies'][$count].key?('network') then
-         if Value['proxies'][$count]['network'].to_s == 'ws'
-            system '${uci_set}obfs_vless=websocket'
-            #ws-path:
-            if Value['proxies'][$count].key?('ws-path') then
-               path = '${uci_set}path=' + Value['proxies'][$count]['ws-path'].to_s
-               system(path)
-            end
-            #Host:
-            if Value['proxies'][$count].key?('ws-headers') then
-               if Value['proxies'][$count]['ws-headers'].key?('Host') then
-                  custom = '${uci_set}custom=' + Value['proxies'][$count]['ws-headers']['Host'].to_s
-                  system(custom)
-               end
-            end
-	    #ws-opts-path:
-            if Value['proxies'][$count].key?('ws-opts') then
-               if Value['proxies'][$count]['ws-opts'].key?('path') then
-                  ws_opts_path = '${uci_set}ws_opts_path=\"' + Value['proxies'][$count]['ws-opts']['path'].to_s + '\"'
-                  system(ws_opts_path)
-               end
-               #ws-opts-headers:
-               if Value['proxies'][$count]['ws-opts'].key?('headers') then
-                  ws_opts_headers = '${uci_set}ws_opts_headers=\"' + Value['proxies'][$count]['ws-opts']['headers'].to_s + '\"'
-                  system(ws_opts_headers)
-               end
-               #max-early-data:
-               if Value['proxies'][$count]['ws-opts'].key?('max-early-data') then
-                  max_early_data = '${uci_set}max_early_data=\"' + Value['proxies'][$count]['ws-opts']['max-early-data'].to_s + '\"'
-                  system(max_early_data)
-               end
-               #early-data-header-name:
-               if Value['proxies'][$count]['ws-opts'].key?('early-data-header-name') then
-                  early_data_header_name = '${uci_set}early_data_header_name=\"' + Value['proxies'][$count]['ws-opts']['early-data-header-name'].to_s + '\"'
-                  system(early_data_header_name)
-               end
-            end
-         else
-            system '${uci_set}obfs_vless=none'
+      if Value['proxies'][$count].key?('ws-opts') then
+      system '${uci_set}obfs_vless=ws'
+      #trojan_ws_path
+         if Value['proxies'][$count]['ws-opts'].key?('path') then
+            trojan_ws_path = '${uci_set}trojan_ws_path=\"' + Value['proxies'][$count]['ws-opts']['path'].to_s + '\"'
+            system(trojan_ws_path)
+         end
+      #trojan_ws_headers
+         if Value['proxies'][$count]['ws-opts'].key?('headers') then
+            system '${uci_del}trojan_ws_headers >/dev/null 2>&1'
+            Value['proxies'][$count]['ws-opts']['headers'].keys.each{
+            |v|
+               trojan_ws_headers = '${uci_add}trojan_ws_headers=\"' + v.to_s + ': '+ Value['proxies'][$count]['ws-opts']['headers'][v].to_s + '\"'
+               system(trojan_ws_headers)
+            }
          end
       end
       }.join
@@ -688,8 +663,12 @@ do
                end
                #ws-opts-headers:
                if Value['proxies'][$count]['ws-opts'].key?('headers') then
-                  ws_opts_headers = '${uci_set}ws_opts_headers=\"' + Value['proxies'][$count]['ws-opts']['headers'].to_s + '\"'
-                  system(ws_opts_headers)
+                  system '${uci_del}ws_opts_headers >/dev/null 2>&1'
+                  Value['proxies'][$count]['ws-opts']['headers'].keys.each{
+                  |v|
+                     ws_opts_headers = '${uci_add}ws_opts_headers=\"' + v.to_s + ': '+ Value['proxies'][$count]['ws-opts']['headers'][v].to_s + '\"'
+                     system(ws_opts_headers)
+                  }
                end
                #max-early-data:
                if Value['proxies'][$count]['ws-opts'].key?('max-early-data') then
@@ -838,6 +817,37 @@ do
       }.join
       
       Thread.new{
+      #grpc-service-name
+      if Value['proxies'][$count].key?('grpc-opts') then
+         system '${uci_set}obfs_trojan=grpc'
+         if Value['proxies'][$count]['grpc-opts'].key?('grpc-service-name') then
+            grpc_service_name = '${uci_set}grpc_service_name=\"' + Value['proxies'][$count]['grpc-opts']['grpc-service-name'].to_s + '\"'
+            system(grpc_service_name)
+         end
+      end
+      }.join
+      
+      Thread.new{
+      if Value['proxies'][$count].key?('ws-opts') then
+      system '${uci_set}obfs_trojan=ws'
+      #trojan_ws_path
+         if Value['proxies'][$count]['ws-opts'].key?('path') then
+            trojan_ws_path = '${uci_set}trojan_ws_path=\"' + Value['proxies'][$count]['ws-opts']['path'].to_s + '\"'
+            system(trojan_ws_path)
+         end
+      #trojan_ws_headers
+         if Value['proxies'][$count]['ws-opts'].key?('headers') then
+            system '${uci_del}trojan_ws_headers >/dev/null 2>&1'
+            Value['proxies'][$count]['ws-opts']['headers'].keys.each{
+            |v|
+               trojan_ws_headers = '${uci_add}trojan_ws_headers=\"' + v.to_s + ': '+ Value['proxies'][$count]['ws-opts']['headers'][v].to_s + '\"'
+               system(trojan_ws_headers)
+            }
+         end
+      end
+      }.join
+      
+      Thread.new{
       #skip-cert-verify
       if Value['proxies'][$count].key?('skip-cert-verify') then
          skip_cert_verify = '${uci_set}skip_cert_verify=' + Value['proxies'][$count]['skip-cert-verify'].to_s
@@ -850,60 +860,6 @@ do
       if Value['proxies'][$count].key?('flow') then
          flow = '${uci_set}flow=' + Value['proxies'][$count]['flow'].to_s
          system(flow)
-      end
-      }.join
-
-      Thread.new{
-      #network:
-      if Value['proxies'][$count].key?('network') then
-         if Value['proxies'][$count]['network'].to_s == 'ws'
-            system '${uci_set}obfs_trojan=websocket'
-            #ws-path:
-            if Value['proxies'][$count].key?('ws-path') then
-               path = '${uci_set}path=' + Value['proxies'][$count]['ws-path'].to_s
-               system(path)
-            end
-            #Host:
-            if Value['proxies'][$count].key?('ws-headers') then
-               if Value['proxies'][$count]['ws-headers'].key?('Host') then
-                  custom = '${uci_set}custom=' + Value['proxies'][$count]['ws-headers']['Host'].to_s
-                  system(custom)
-               end
-            end
-	    #ws-opts-path:
-            if Value['proxies'][$count].key?('ws-opts') then
-               if Value['proxies'][$count]['ws-opts'].key?('path') then
-                  ws_opts_path = '${uci_set}ws_opts_path=\"' + Value['proxies'][$count]['ws-opts']['path'].to_s + '\"'
-                  system(ws_opts_path)
-               end
-               #ws-opts-headers:
-               if Value['proxies'][$count]['ws-opts'].key?('headers') then
-                  ws_opts_headers = '${uci_set}ws_opts_headers=\"' + Value['proxies'][$count]['ws-opts']['headers'].to_s + '\"'
-                  system(ws_opts_headers)
-               end
-               #max-early-data:
-               if Value['proxies'][$count]['ws-opts'].key?('max-early-data') then
-                  max_early_data = '${uci_set}max_early_data=\"' + Value['proxies'][$count]['ws-opts']['max-early-data'].to_s + '\"'
-                  system(max_early_data)
-               end
-               #early-data-header-name:
-               if Value['proxies'][$count]['ws-opts'].key?('early-data-header-name') then
-                  early_data_header_name = '${uci_set}early_data_header_name=\"' + Value['proxies'][$count]['ws-opts']['early-data-header-name'].to_s + '\"'
-                  system(early_data_header_name)
-               end
-            end
-         elsif Value['proxies'][$count]['network'].to_s == 'grpc'
-            #grpc-service-name
-            system '${uci_set}obfs_trojan=grpc'
-            if Value['proxies'][$count].key?('grpc-opts') then
-               if Value['proxies'][$count]['grpc-opts'].key?('grpc-service-name') then
-                  grpc_service_name = '${uci_set}grpc_service_name=\"' + Value['proxies'][$count]['grpc-opts']['grpc-service-name'].to_s + '\"'
-                  system(grpc_service_name)
-               end
-            end
-         else
-            system '${uci_set}obfs_trojan=none'
-         end
       end
       }.join
    end;
