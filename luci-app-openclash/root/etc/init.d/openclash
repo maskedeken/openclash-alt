@@ -2325,10 +2325,7 @@ stop()
    LOG_OUT "Step 1: Backup The Current Groups State..."
    /usr/share/openclash/openclash_history_get.sh 2>/dev/null
 
-   LOG_OUT "Step 2: Delete OpenClash Firewall Rules..."
-   revert_firewall
-
-   LOG_OUT "Step 3: Close The OpenClash Daemons..."
+   LOG_OUT "Step 2: Close The OpenClash Daemons..."
    watchdog_pids=$(unify_ps_pids "openclash_watchdog.sh")
    for watchdog_pid in $watchdog_pids; do
       kill -9 "$watchdog_pid" >/dev/null 2>&1
@@ -2339,10 +2336,13 @@ stop()
       kill -9 "$streaming_unlock_pid" >/dev/null 2>&1
    done >/dev/null 2>&1
    
-   LOG_OUT "Step 4: Close The Clash Core Process..."
+   LOG_OUT "Step 3: Close The Clash Core Process..."
    if [ "$enable" != "1" ]; then
       kill_clash
    fi
+
+   LOG_OUT "Step 4: Delete OpenClash Firewall Rules..."
+   revert_firewall
 
    LOG_OUT "Step 5: Restart Dnsmasq..."
    dns_port=$(uci -q get openclash.config.dns_port)

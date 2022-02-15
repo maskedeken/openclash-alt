@@ -1958,14 +1958,14 @@ msgstr "OpenClash 开始关闭..."
 msgid "Step 1: Backup The Current Groups State..."
 msgstr "第一步: 备份当前策略组状态..."
 
-msgid "Step 2: Delete OpenClash Firewall Rules..."
-msgstr "第二步: 删除 OpenClash 防火墙规则..."
+msgid "Step 2: Close The OpenClash Daemons..."
+msgstr "第二步: 关闭 OpenClash 守护程序..."
 
-msgid "Step 3: Close The OpenClash Daemons..."
-msgstr "第三步: 关闭 OpenClash 守护程序..."
+msgid "Step 3: Close The Clash Core Process..."
+msgstr "第三步: 关闭 Clash 主程序..."
 
-msgid "Step 4: Close The Clash Core Process..."
-msgstr "第四步: 关闭 Clash 主程序..."
+msgid "Step 4: Delete OpenClash Firewall Rules..."
+msgstr "第四步: 删除 OpenClash 防火墙规则..."
 
 msgid "Step 5: Restart Dnsmasq..."
 msgstr "第五步: 重启 Dnsmasq 程序..."
