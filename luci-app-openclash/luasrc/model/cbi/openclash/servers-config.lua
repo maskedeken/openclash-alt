@@ -118,7 +118,7 @@ o = s:option(ListValue, "type", translate("Server Node Type"))
 o:value("ss", translate("Shadowsocks"))
 o:value("ssr", translate("ShadowsocksR"))
 o:value("vmess", translate("Vmess"))
-o:value("vless", translate("VLESS"))
+o:value("vless", translate("Vless"))
 o:value("trojan", translate("trojan"))
 o:value("snell", translate("Snell"))
 o:value("socks5", translate("Socks5"))
@@ -164,6 +164,7 @@ o:depends("type", "ss")
 
 o = s:option(ListValue, "cipher_ssr", translate("Encrypt Method"))
 for _, v in ipairs(encrypt_methods_ssr) do o:value(v) end
+o:value("dummy", "none")
 o.rmempty = true
 o:depends("type", "ssr")
 
@@ -196,7 +197,7 @@ o.rmempty = true
 o:depends("type", "vmess")
 
 -- VmessId
-o = s:option(Value, "uuid", translate("VmessId (UUID)"))
+o = s:option(Value, "uuid", translate("UUID"))
 o.rmempty = true
 o.default = uuid
 o:depends("type", "vmess")
@@ -232,6 +233,14 @@ o:value("tls")
 o:value("http")
 o:depends("type", "snell")
 
+o = s:option(ListValue, "obfs_vless", translate("obfs-mode"))
+o.rmempty = true
+o.default = "none"
+o:value("none")
+o:value("ws", translate("websocket (ws)"))
+o:value("grpc", translate("grpc"))
+o:depends("type", "vless")
+
 o = s:option(ListValue, "obfs_vmess", translate("obfs-mode"))
 o.rmempty = true
 o.default = "none"
@@ -241,13 +250,6 @@ o:value("http", translate("http"))
 o:value("h2", translate("h2"))
 o:value("grpc", translate("grpc"))
 o:depends("type", "vmess")
-
-o = s:option(ListValue, "obfs_vless", translate("obfs-mode"))
-o.rmempty = true
-o.default = "none"
-o:value("none")
-o:value("ws", translate("websocket (ws)"))
-o:depends("type", "vless")
 
 o = s:option(ListValue, "obfs_trojan", translate("obfs-mode"))
 o.rmempty = true
@@ -299,11 +301,13 @@ o = s:option(Value, "ws_opts_path", translate("ws-opts-path"))
 o.rmempty = true
 o.placeholder = translate("/path")
 o:depends("obfs_vmess", "websocket")
+o:depends("obfs_vless", "ws")
 
 o = s:option(DynamicList, "ws_opts_headers", translate("ws-opts-headers"))
 o.rmempty = true
 o.placeholder = translate("Host: v2ray.com")
 o:depends("obfs_vmess", "websocket")
+o:depends("obfs_vless", "ws")
 
 o = s:option(Value, "max_early_data", translate("max-early-data"))
 o.rmempty = true
@@ -350,18 +354,19 @@ o:depends({obfs_vmess = "grpc", tls = "true"})
 o:depends({obfs_vmess = "none", tls = "true"})
 o:depends("type", "vless")
 
+o = s:option(Value, "vless_flow", translate("flow"))
+o.rmempty = true
+o.default = "xtls-rprx-direct"
+o:value("xtls-rprx-direct")
+o:value("xtls-rprx-origin")
+o:depends("obfs_vless", "none")
+
 o = s:option(Value, "keep_alive", translate("keep-alive"))
 o.rmempty = true
 o.default = "true"
 o:value("true")
 o:value("false")
 o:depends("obfs_vmess", "http")
-
--- vless流控
-o = s:option(Value, "flow", translate("Flow"))
-o.rmempty = true
-o:depends("obfs_vless", "none")
-o:depends("obfs_trojan", "none")
 
 -- [[ MUX ]]--
 o = s:option(ListValue, "mux", translate("mux"))
@@ -406,20 +411,19 @@ o.datatype = "host"
 o.placeholder = translate("example")
 o:depends("obfs_trojan", "grpc")
 o:depends("obfs_vmess", "grpc")
+o:depends("obfs_vless", "grpc")
 
 -- [[ trojan-ws-path ]]--
 o = s:option(Value, "trojan_ws_path", translate("Path"))
 o.rmempty = true
 o.placeholder = translate("/path")
 o:depends("obfs_trojan", "ws")
-o:depends("obfs_vless", "ws")
 
 -- [[ trojan-ws-headers ]]--
 o = s:option(DynamicList, "trojan_ws_headers", translate("Headers"))
 o.rmempty = true
 o.placeholder = translate("Host: v2ray.com")
 o:depends("obfs_trojan", "ws")
-o:depends("obfs_vless", "ws")
 
 -- [[ interface-name ]]--
 o = s:option(Value, "interface_name", translate("interface-name"))

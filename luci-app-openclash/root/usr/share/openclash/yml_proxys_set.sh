@@ -203,7 +203,6 @@ yml_servers_set()
    config_get "obfs_param" "$section" "obfs_param" ""
    config_get "obfs_vmess" "$section" "obfs_vmess" ""
    config_get "obfs_trojan" "$section" "obfs_trojan" ""
-   config_get "obfs_vless" "$section" "obfs_vless" ""
    config_get "protocol" "$section" "protocol" ""
    config_get "protocol_param" "$section" "protocol_param" ""
    config_get "host" "$section" "host" ""
@@ -227,7 +226,6 @@ yml_servers_set()
    config_get "h2_path" "$section" "h2_path" ""
    config_get "h2_host" "$section" "h2_host" ""
    config_get "grpc_service_name" "$section" "grpc_service_name" ""
-   config_get "flow" "$section" "flow" ""
    config_get "ws_opts_path" "$section" "ws_opts_path" ""
    config_get "ws_opts_headers" "$section" "ws_opts_headers" ""
    config_get "max_early_data" "$section" "max_early_data" ""
@@ -236,6 +234,8 @@ yml_servers_set()
    config_get "trojan_ws_headers" "$section" "trojan_ws_headers" ""
    config_get "interface_name" "$section" "interface_name" ""
    config_get "routing_mark" "$section" "routing_mark" ""
+   config_get "obfs_vless" "$section" "obfs_vless" ""
+   config_get "vless_flow" "$section" "vless_flow" ""
 
    if [ "$enabled" = "0" ]; then
       return
@@ -288,6 +288,10 @@ yml_servers_set()
    fi
    LOG_OUT "Start Writing【$CONFIG_NAME - $type - $name】Proxy To Config File..."
    
+   if [ "$cipher_ssr" == "none" ]; then
+      cipher_ssr="dummy"
+   fi
+   
    if [ "$obfs" != "none" ] && [ -n "$obfs" ]; then
       if [ "$obfs" = "websocket" ]; then
          obfss="plugin: v2ray-plugin"
@@ -297,7 +301,15 @@ yml_servers_set()
    else
       obfss=""
    fi
-
+   
+   if [ "$obfs_vless" = "ws" ]; then
+      obfs_vless="network: ws"
+   fi
+   
+   if [ "$obfs_vless" = "grpc" ]; then
+      obfs_vless="network: grpc"
+   fi
+   
    if [ "$obfs_vmess" = "websocket" ]; then
       obfs_vmess="network: ws"
    fi
@@ -411,64 +423,6 @@ cat >> "$SERVER_FILE" <<-EOF
 EOF
    fi
 fi
-
-#vless
-   if [ "$type" = "vless" ]; then
-cat >> "$SERVER_FILE" <<-EOF
-  - name: "$name"
-    type: $type
-    server: $server
-    port: $port
-    uuid: $uuid
-EOF
-      if [ ! -z "$udp" ]; then
-cat >> "$SERVER_FILE" <<-EOF
-    udp: $udp
-EOF
-      fi
-      if [ ! -z "$skip_cert_verify" ]; then
-cat >> "$SERVER_FILE" <<-EOF
-    skip-cert-verify: $skip_cert_verify
-EOF
-      fi
-      if [ ! -z "$servername" ]; then
-cat >> "$SERVER_FILE" <<-EOF
-    servername: $servername
-EOF
-      fi
-      if [ ! -z "$alpn" ]; then
-cat >> "$SERVER_FILE" <<-EOF
-    alpn:
-EOF
-      config_list_foreach "$section" "alpn" set_alpn
-      fi
-      if [ ! -z "$flow" ]; then
-cat >> "$SERVER_FILE" <<-EOF
-    flow: $flow
-EOF
-      fi
-      if [ "$obfs_vless" = "ws" ]; then
-cat >> "$SERVER_FILE" <<-EOF
-    network: ws
-EOF
-        if [ -n "$trojan_ws_path" ] || [ -n "$trojan_ws_headers" ]; then
-cat >> "$SERVER_FILE" <<-EOF
-    ws-opts:
-EOF
-        fi
-        if [ -n "$trojan_ws_path" ]; then
-cat >> "$SERVER_FILE" <<-EOF
-      path: "$trojan_ws_path"
-EOF
-        fi
-        if [ -n "$trojan_ws_headers" ]; then
-cat >> "$SERVER_FILE" <<-EOF
-      headers:
-EOF
-         config_list_foreach "$section" "trojan_ws_headers" set_ws_headers
-        fi
-     fi
-   fi
 
 #vmess
    if [ "$type" = "vmess" ]; then
@@ -584,7 +538,74 @@ EOF
          fi
       fi
    fi
-
+   
+#vless
+   if [ "$type" = "vless" ]; then
+cat >> "$SERVER_FILE" <<-EOF
+  - name: "$name"
+    type: $type
+    server: "$server"
+    port: $port
+    uuid: $uuid
+EOF
+      if [ ! -z "$udp" ]; then
+cat >> "$SERVER_FILE" <<-EOF
+    udp: $udp
+EOF
+      fi
+      if [ ! -z "$skip_cert_verify" ]; then
+cat >> "$SERVER_FILE" <<-EOF
+    skip-cert-verify: $skip_cert_verify
+EOF
+      fi
+      if [ ! -z "$servername" ]; then
+cat >> "$SERVER_FILE" <<-EOF
+    servername: "$servername"
+EOF
+      fi
+      if [ ! -z "$alpn" ]; then
+cat >> "$SERVER_FILE" <<-EOF
+    alpn:
+EOF
+      config_list_foreach "$section" "alpn" set_alpn
+      fi
+      if [ "$obfs_vless" != "none" ]; then
+cat >> "$SERVER_FILE" <<-EOF
+    $obfs_vless
+EOF
+         if [ "$obfs_vless" = "network: ws" ]; then
+            if [ -n "$ws_opts_path" ] || [ -n "$ws_opts_headers" ]; then
+cat >> "$SERVER_FILE" <<-EOF
+    ws-opts:
+EOF
+               if [ -n "$ws_opts_path" ]; then
+cat >> "$SERVER_FILE" <<-EOF
+      path: "$ws_opts_path"
+EOF
+               fi
+               if [ -n "$ws_opts_headers" ]; then
+cat >> "$SERVER_FILE" <<-EOF
+      headers:
+EOF
+                  config_list_foreach "$section" "ws_opts_headers" set_ws_headers
+               fi
+            fi
+         fi
+         if [ ! -z "$grpc_service_name" ] && [ "$obfs_vless" = "network: grpc" ]; then
+cat >> "$SERVER_FILE" <<-EOF
+    grpc-opts:
+      grpc-service-name: "$grpc_service_name"
+EOF
+         fi
+      else
+         if [ ! -z "$vless_flow" ]; then
+cat >> "$SERVER_FILE" <<-EOF
+    flow: "$vless_flow"
+EOF
+         fi
+      fi
+   fi
+   
 #socks5
    if [ "$type" = "socks5" ]; then
 cat >> "$SERVER_FILE" <<-EOF
@@ -683,11 +704,6 @@ EOF
    if [ ! -z "$skip_cert_verify" ]; then
 cat >> "$SERVER_FILE" <<-EOF
     skip-cert-verify: $skip_cert_verify
-EOF
-   fi
-   if [ ! -z "$flow" ]; then
-cat >> "$SERVER_FILE" <<-EOF
-    flow: $flow
 EOF
    fi
    if [ "$obfs_trojan" = "grpc" ]; then
