@@ -118,7 +118,7 @@ o = s:option(ListValue, "type", translate("Server Node Type"))
 o:value("ss", translate("Shadowsocks"))
 o:value("ssr", translate("ShadowsocksR"))
 o:value("vmess", translate("Vmess"))
-o:value("vless", translate("Vless"))
+o:value("vless", translate("Vless ")..translate("(Only Meta Core)"))
 o:value("trojan", translate("trojan"))
 o:value("snell", translate("Snell"))
 o:value("socks5", translate("Socks5"))
@@ -356,7 +356,7 @@ o:depends("type", "vless")
 
 o = s:option(Value, "vless_flow", translate("flow"))
 o.rmempty = true
-o.default = "xtls-rprx-direct"
+o.default = ""
 o:value("xtls-rprx-direct")
 o:value("xtls-rprx-origin")
 o:depends("obfs_vless", "none")
