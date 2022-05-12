@@ -194,6 +194,8 @@ yml_dns_get()
       dns_type="https://"
    elif [ "$type" = "quic" ]; then
       dns_type="quic://"
+   elif [ "$type" = "sdns" ]; then
+      dns_type="sdns://"
    fi
 
    if [ -n "$port" ] && [ -n "$ip" ]; then
