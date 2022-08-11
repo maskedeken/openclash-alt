@@ -494,18 +494,6 @@ o.rmempty = true
 o.placeholder = translate("yubiyubi")
 o:depends("type", "hysteria")
 
--- [[ hysteria_ca ]]--
-o = s:option(Value, "hysteria_ca", translate("ca"))
-o.rmempty = true
-o.placeholder = translate("./my.ca")
-o:depends("type", "hysteria")
-
--- [[ hysteria_ca_str ]]--
-o = s:option(Value, "hysteria_ca_str", translate("ca_str"))
-o.rmempty = true
-o.placeholder = translate("xyz")
-o:depends("type", "hysteria")
-
 -- [[ recv_window_conn ]]--
 o = s:option(Value, "recv_window_conn", translate("recv_window_conn"))
 o.rmempty = true

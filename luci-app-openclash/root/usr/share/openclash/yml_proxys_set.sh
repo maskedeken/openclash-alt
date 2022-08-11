@@ -246,8 +246,6 @@ yml_servers_set()
    config_get "hysteria_obfs" "$section" "hysteria_obfs" ""
    config_get "hysteria_auth" "$section" "hysteria_auth" ""
    config_get "hysteria_auth_str" "$section" "hysteria_auth_str" ""
-   config_get "hysteria_ca" "$section" "hysteria_ca" ""
-   config_get "hysteria_ca_str" "$section" "hysteria_ca_str" ""
    config_get "recv_window_conn" "$section" "recv_window_conn" ""
    config_get "recv_window" "$section" "recv_window" ""
    config_get "disable_mtu_discovery" "$section" "disable_mtu_discovery" ""
@@ -611,16 +609,6 @@ EOF
       if [ -n "$hysteria_auth_str" ]; then
 cat >> "$SERVER_FILE" <<-EOF
     auth_str: "$hysteria_auth_str"
-EOF
-      fi
-      if [ -n "$hysteria_ca" ]; then
-cat >> "$SERVER_FILE" <<-EOF
-    ca: "$hysteria_ca"
-EOF
-      fi
-      if [ -n "$hysteria_ca_str" ]; then
-cat >> "$SERVER_FILE" <<-EOF
-    ca_str: "$hysteria_ca_str"
 EOF
       fi
       if [ -n "$recv_window_conn" ]; then

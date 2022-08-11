@@ -834,22 +834,6 @@ do
       }.join
 
       Thread.new{
-      #hysteria_ca
-      if Value['proxies'][$count].key?('ca') then
-         hysteria_ca = '${uci_set}hysteria_ca=' + Value['proxies'][$count]['ca'].to_s
-         system(hysteria_ca)
-      end
-      }.join
-
-      Thread.new{
-      #hysteria_ca_str
-      if Value['proxies'][$count].key?('ca_str') then
-         hysteria_ca_str = '${uci_set}hysteria_ca_str=' + Value['proxies'][$count]['ca_str'].to_s
-         system(hysteria_ca_str)
-      end
-      }.join
-
-      Thread.new{
       #disable_mtu_discovery
       if Value['proxies'][$count].key?('disable_mtu_discovery') then
          disable_mtu_discovery = '${uci_set}disable_mtu_discovery=' + Value['proxies'][$count]['disable_mtu_discovery'].to_s
