@@ -451,8 +451,7 @@ o:depends("obfs_trojan", "none")
 
 -- [[ alpn ]]--
 o = s:option(Value, "hysteria_alpn", translate("alpn"))
-o.rmempty = false
-o.default = "h3"
+o.rmempty = true
 o:depends("type", "hysteria")
 
 -- [[ grpc ]]--
