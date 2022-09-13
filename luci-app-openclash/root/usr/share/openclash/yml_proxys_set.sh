@@ -966,7 +966,7 @@ EOF
 fi
 cat /tmp/Proxy_Provider >> $SERVER_FILE 2>/dev/null
 cat >> "$SERVER_FILE" <<-EOF
-    url: https://cp.cloudflare.com/generate_204
+    url: http://cp.cloudflare.com/generate_204
     interval: "600"
     tolerance: "150"
   - name: Proxy
@@ -1064,7 +1064,7 @@ EOF
 fi
 cat /tmp/Proxy_Provider >> $SERVER_FILE 2>/dev/null
 cat >> "$SERVER_FILE" <<-EOF
-    url: https://cp.cloudflare.com/generate_204
+    url: http://cp.cloudflare.com/generate_204
     interval: "600"
     tolerance: "150"
   - name: Proxy
@@ -1146,20 +1146,6 @@ cat >> "$SERVER_FILE" <<-EOF
     proxies:
       - Asian TV
       - DIRECT
-EOF
-cat /tmp/Proxy_Server >> $SERVER_FILE 2>/dev/null
-if [ -f "/tmp/Proxy_Provider" ]; then
-cat >> "$SERVER_FILE" <<-EOF
-    use:
-EOF
-fi
-cat /tmp/Proxy_Provider >> $SERVER_FILE 2>/dev/null
-cat >> "$SERVER_FILE" <<-EOF
-  - name: Douyin
-    type: select
-    proxies:
-      - DIRECT
-      - Asian TV
 EOF
 cat /tmp/Proxy_Server >> $SERVER_FILE 2>/dev/null
 if [ -f "/tmp/Proxy_Provider" ]; then
@@ -1400,6 +1386,20 @@ EOF
 fi
 cat /tmp/Proxy_Provider >> $SERVER_FILE 2>/dev/null
 cat >> "$SERVER_FILE" <<-EOF
+  - name: Discord
+    type: select
+    proxies:
+      - Proxy
+      - DIRECT
+EOF
+cat /tmp/Proxy_Server >> $SERVER_FILE 2>/dev/null
+if [ -f "/tmp/Proxy_Provider" ]; then
+cat >> "$SERVER_FILE" <<-EOF
+    use:
+EOF
+fi
+cat /tmp/Proxy_Provider >> $SERVER_FILE 2>/dev/null
+cat >> "$SERVER_FILE" <<-EOF
   - name: PayPal
     type: select
     proxies:
@@ -1426,7 +1426,6 @@ ${uci_set}AsianTV="Asian TV"
 ${uci_set}Proxy="Proxy"
 ${uci_set}Youtube="Youtube"
 ${uci_set}Bilibili="Bilibili"
-${uci_set}Douyin="Douyin"
 ${uci_set}Bahamut="Bahamut"
 ${uci_set}HBOMax="HBO Max"
 ${uci_set}HBOGo="HBO Go"
@@ -1445,6 +1444,7 @@ ${uci_set}AdBlock="AdBlock"
 ${uci_set}Speedtest="Speedtest"
 ${uci_set}Telegram="Telegram"
 ${uci_set}Crypto="Crypto"
+${uci_set}Discord="Discord"
 ${uci_set}PayPal="PayPal"
 ${uci_set}Domestic="Domestic"
 ${uci_set}Others="Others"
@@ -1456,7 +1456,6 @@ ${uci_set}Others="Others"
 	${UCI_DEL_LIST}="Proxy" >/dev/null 2>&1 && ${UCI_ADD_LIST}="Proxy" >/dev/null 2>&1
 	${UCI_DEL_LIST}="Youtube" >/dev/null 2>&1 && ${UCI_ADD_LIST}="Youtube" >/dev/null 2>&1
 	${UCI_DEL_LIST}="Bilibili" >/dev/null 2>&1 && ${UCI_ADD_LIST}="Bilibili" >/dev/null 2>&1
-   ${UCI_DEL_LIST}="Douyin" >/dev/null 2>&1 && ${UCI_ADD_LIST}="Douyin" >/dev/null 2>&1
 	${UCI_DEL_LIST}="Bahamut" >/dev/null 2>&1 && ${UCI_ADD_LIST}="Bahamut" >/dev/null 2>&1
 	${UCI_DEL_LIST}="HBO Max" >/dev/null 2>&1 && ${UCI_ADD_LIST}="HBO Max" >/dev/null 2>&1
 	${UCI_DEL_LIST}="HBO Go" >/dev/null 2>&1 && ${UCI_ADD_LIST}="HBO Go" >/dev/null 2>&1
@@ -1474,6 +1473,7 @@ ${uci_set}Others="Others"
 	${UCI_DEL_LIST}="Steam" >/dev/null 2>&1 && ${UCI_ADD_LIST}="Steam" >/dev/null 2>&1
 	${UCI_DEL_LIST}="Telegram" >/dev/null 2>&1 && ${UCI_ADD_LIST}="Telegram" >/dev/null 2>&1
    ${UCI_DEL_LIST}="Crypto" >/dev/null 2>&1 && ${UCI_ADD_LIST}="Crypto" >/dev/null 2>&1
+   ${UCI_DEL_LIST}="Discord" >/dev/null 2>&1 && ${UCI_ADD_LIST}="Discord" >/dev/null 2>&1
 	${UCI_DEL_LIST}="PayPal" >/dev/null 2>&1 && ${UCI_ADD_LIST}="PayPal" >/dev/null 2>&1
 	${UCI_DEL_LIST}="Speedtest" >/dev/null 2>&1 && ${UCI_ADD_LIST}="Speedtest" >/dev/null 2>&1
 }
@@ -1497,7 +1497,7 @@ EOF
 fi
 cat /tmp/Proxy_Provider >> $SERVER_FILE 2>/dev/null
 cat >> "$SERVER_FILE" <<-EOF
-    url: https://cp.cloudflare.com/generate_204
+    url: http://cp.cloudflare.com/generate_204
     interval: "600"
     tolerance: "150"
   - name: Proxy
